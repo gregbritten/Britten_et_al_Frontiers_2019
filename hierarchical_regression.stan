@@ -8,39 +8,20 @@ data{
 	vector[N] x;   //x variable
 }
 parameters{
-	real<lower=-2,upper=8>    logFeu_global;  //global intercept
-	real<lower=-2,upper=8>    b_bar_global;   //global slope
-	real<lower=-2,upper=8>    logFeu_bar[N_R];//number of station means for intercept equal to number of biomes	
-	real<lower=-2,upper=8>    b_bar[N_R];     //number of station means for slope equal to number of biomes 
-	real<lower=1e-15,upper=5> logFeu_bar_sd;  //standard deviation of biome intercepts
-	real<lower=1e-15,upper=3> b_bar_sd;       //standard deviation of biomas slopes
-	real<lower=-2,upper=8>    logFeu[N_p];    //p intercepts for individual stations
-	real<lower=0,upper=3>     b[N_p];	      //p slopes for individual stations
-	real<lower=1e-15,upper=5> logFeu_sd[N_R]; //standard deviation for individual intercepts
-	real<lower=1e-15,upper=3> b_sd[N_R];      //standard deviation for individual slopes
-	real<lower=1e-15,upper=10 sigma[N_R];     //standard deviation of measurement noise for individual observations
+	real<lower=-10,upper=10> logFeu_bar[N_R]; //number of station means for intercept equal to number of biomes	
+	real<lower=-10,upper=10> b_bar[N_R];      //number of station means for slope equal to number of biomes 
+	real<lower=-10,upper=10> logFeu[N_p];     //p intercepts for individual stations
+	real<lower=0,upper=3> b[N_p];	          //p slopes for individual stations
+	real<lower=1e-15,upper=10> logFeu_sd;     //standard deviation for individual intercepts
+	real<lower=1e-15,upper=3> b_sd;           //standard deviation for individual slopes
+	real<lower=1e-15> sigma;                  //standard deviation of measurement noise for individual observations
 }
 model{
 	for(j in 1:N_R){
-		logFeu_bar[j] ~ normal(logFeu_global,logFeu_bar_sd)
-		b_bar[j]      ~ normal(b_bar_global,b_bar_sd)
-		for(i in (np[j]+1):np[j+1]){                                                        //loop over stations
-			logFeu[i]            ~ normal(logFeu_bar[j],logFeu_sd[j]);                      //indv int drawn from dist with biome-specific mean
-			b[i]                 ~ normal(b_bar[j],     b_sd[j]);                           //indv slope from dist with biome-specific mean
-			y[(ni[i]+1):ni[i+1]] ~ normal(logFeu[i] - b[i]*x[(ni[i]+1):ni[i+1]], sigma[j]); //likelihood of data, station by station
+		for(i in (np[j]+1):np[j+1]){                                                                    //loop over stations
+			logFeu[i]            ~ normal(logFeu_bar[j],logFeu_sd);                      //indv int drawn from dist with biome-specific mean
+			b[i]                 ~ normal(b_bar[j],     b_sd);                           //indv slope from dist with biome-specific mean
+			y[(ni[i]+1):ni[i+1]] ~ normal(logFeu[i] - b[i]*x[(ni[i]+1):ni[i+1]], sigma); //likelihood of data, station by station
 		}
 	}
 }
-//generated quantities{
-//	vector[N] log_p_y_theta;
-//	int j;
-//	j = 1;
-//	for(i in 1:p){
-//		for(k in 1:n[i]){
-//			log_p_y_theta[j] = normal_lpdf(y[j] | logJ0[i] - b[i]*x[j], sigma);
-//			j = j+1;
-//		}
-//	}
-//}
-
-
