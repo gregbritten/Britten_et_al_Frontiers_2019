@@ -6,6 +6,8 @@ Sys.setenv(LOCAL_CPPFLAGS = '-march=corei7 -mtune=corei7')
 options(mc.cores = parallel::detectCores())
 library(brms)
 
+read.csv('D.csv')
+
 prior_go           <- get_prior(y ~ x + (x|region/id_X),data=D)
 prior_go$prior[1]  <- 'uniform(-10,10)'
 prior_go$prior[2]  <- 'uniform(-3,0)'
